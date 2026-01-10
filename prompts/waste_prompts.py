@@ -19,69 +19,260 @@ from dataclasses import dataclass
 from enum import Enum
 
 # ============================================================================
-# BASE TEMPLATES: Essential class descriptors
+# HIERARCHICAL PROMPT TEMPLATES (Levels 1-4)
 # ============================================================================
-BASE_TEMPLATES: Dict[str, List[str]] = {
+
+# Level 1: Generic Material Descriptors (minimal context)
+LEVEL1_GENERIC: Dict[str, List[str]] = {
     "plastic": [
+        "plastic",
+        "plastic material",
         "plastic waste",
-        "plastic bottle",
-        "plastic bag",
-        "plastic packaging",
-        "plastic container",
-        "plastic film",
+        "discarded plastic",
     ],
     "paper": [
+        "paper",
+        "paper material",
         "paper waste",
         "cardboard",
-        "newspaper",
-        "cardboard box",
-        "paper scraps",
-        "paper envelope",
     ],
     "metal": [
-        "metal waste",
-        "aluminum can",
-        "metal can",
-        "steel waste",
-        "tin can",
-        "metal foil",
-        "shiny metal surface",
-        "reflective metal object",
+        "metal",
         "metallic material",
-        "polished metal",
-        "metal lid",
-        "chrome metal",
+        "metal waste",
+        "shiny metal",
     ],
     "glass": [
+        "glass",
+        "glass material",
         "glass waste",
-        "glass bottle",
-        "glass jar",
-        "broken glass",
-        "glass container",
-        "glass fragment",
+        "transparent glass",
     ],
     "organic": [
         "organic waste",
         "food waste",
-        "food scraps",
-        "vegetable waste",
-        "fruit waste",
-        "compostable waste",
+        "compost",
+        "biodegradable waste",
     ],
     "e-waste": [
+        "electronics",
         "electronic waste",
         "circuit board",
-        "broken electronics",
+        "electronic device",
+    ],
+}
+
+# Level 2: Contextual Descriptors (adds photo/scene context)
+LEVEL2_CONTEXTUAL: Dict[str, List[str]] = {
+    "plastic": [
+        "a photo of plastic waste",
+        "a close-up of plastic material",
+        "plastic waste in a photo",
+        "discarded plastic in an image",
+        "plastic garbage in a picture",
+        "a photograph of plastic trash",
+    ],
+    "paper": [
+        "a photo of paper waste",
+        "a close-up of paper material",
+        "cardboard in a photo",
+        "discarded paper in an image",
+        "paper garbage in a picture",
+        "a photograph of paper trash",
+    ],
+    "metal": [
+        "a photo of metal waste",
+        "a close-up of metallic object",
+        "metal can in a photo",
+        "discarded metal in an image",
+        "metallic garbage in a picture",
+        "a photograph of metal trash",
+    ],
+    "glass": [
+        "a photo of glass waste",
+        "a close-up of glass object",
+        "glass bottle in a photo",
+        "discarded glass in an image",
+        "glass garbage in a picture",
+        "a photograph of glass trash",
+    ],
+    "organic": [
+        "a photo of organic waste",
+        "a close-up of food scraps",
+        "organic waste in a photo",
+        "discarded food in an image",
+        "food garbage in a picture",
+        "a photograph of food waste",
+    ],
+    "e-waste": [
+        "a photo of electronic waste",
+        "a close-up of circuit board",
+        "electronics in a photo",
+        "discarded electronics in an image",
+        "electronic garbage in a picture",
+        "a photograph of e-waste",
+    ],
+}
+
+# Level 3: Object-Based Descriptors (specific waste items)
+LEVEL3_OBJECT_BASED: Dict[str, List[str]] = {
+    "plastic": [
+        "plastic bottle",
+        "plastic bag",
+        "plastic packaging",
+        "plastic container",
+        "plastic wrapper",
+        "plastic cup",
+        "plastic straw",
+        "plastic food container",
+        "plastic water bottle",
+        "plastic shopping bag",
+        "plastic film wrap",
+        "plastic takeout container",
+        "clear plastic bottle",
+        "crushed plastic bottle",
+        "empty plastic container",
+    ],
+    "paper": [
+        "cardboard box",
+        "newspaper",
+        "paper bag",
+        "paper envelope",
+        "paper scraps",
+        "corrugated cardboard",
+        "folded cardboard",
+        "torn paper",
+        "paper packaging",
+        "paper receipt",
+        "office paper",
+        "shredded paper",
+        "crumpled paper",
+        "flattened cardboard box",
+    ],
+    "metal": [
+        "aluminum can",
+        "metal can",
+        "tin can",
+        "soda can",
+        "beer can",
+        "metal lid",
+        "metal foil",
+        "steel can",
+        "crushed aluminum can",
+        "shiny metal can",
+        "reflective metal surface",
+        "polished metal object",
+        "chrome metal",
+        "aluminum beverage can",
+    ],
+    "glass": [
+        "glass bottle",
+        "glass jar",
+        "wine bottle",
+        "beer bottle",
+        "glass container",
+        "broken glass",
+        "glass fragment",
+        "clear glass bottle",
+        "green glass bottle",
+        "brown glass bottle",
+        "glass food jar",
+        "empty glass bottle",
+    ],
+    "organic": [
+        "food scraps",
+        "fruit peel",
+        "vegetable waste",
+        "banana peel",
+        "apple core",
+        "orange peel",
+        "leftovers",
+        "spoiled food",
+        "rotten fruit",
+        "vegetable scraps",
+        "eggshells",
+        "coffee grounds",
+        "tea bags",
+    ],
+    "e-waste": [
+        "circuit board",
+        "motherboard",
+        "computer chip",
         "electronic cable",
+        "wire",
+        "broken phone",
+        "old laptop part",
         "electronic component",
-        "tech waste",
-        "computer part",
         "circuit board with chips",
         "silicon chip",
-        "motherboard",
-        "broken phone or laptop",
-        "wired electronic device",
+        "printed circuit board",
+        "PCB with components",
+        "electronic connector",
+        "battery",
     ],
+}
+
+# Level 4: Contamination-Aware Descriptors (real-world conditions)
+LEVEL4_CONTAMINATION: Dict[str, List[str]] = {
+    "plastic": [
+        "plastic bottle with food residue",
+        "dirty plastic container",
+        "plastic with sticky residue",
+        "contaminated plastic packaging",
+        "plastic bag with stains",
+        "greasy plastic container",
+        "plastic with dried food",
+        "stained plastic wrapper",
+    ],
+    "paper": [
+        "paper with food stains",
+        "dirty cardboard box",
+        "wet paper waste",
+        "stained newspaper",
+        "paper with grease marks",
+        "contaminated cardboard",
+        "soggy paper",
+        "paper with oil stains",
+    ],
+    "metal": [
+        "metal can with liquid residue",
+        "dirty aluminum can",
+        "rusty metal waste",
+        "metal with corrosion",
+        "tarnished metal surface",
+        "metal can with sticky residue",
+        "oxidized metal",
+    ],
+    "glass": [
+        "glass bottle with label residue",
+        "dirty glass jar",
+        "glass with dried liquid",
+        "contaminated glass container",
+        "glass with sticky residue",
+        "stained glass bottle",
+    ],
+    "organic": [
+        "rotten food waste",
+        "moldy organic matter",
+        "decaying food scraps",
+        "spoiled fruit waste",
+        "decomposing vegetable matter",
+        "organic waste with mold",
+    ],
+    "e-waste": [
+        "dusty circuit board",
+        "corroded electronic component",
+        "dirty electronic waste",
+        "circuit board with dust",
+        "aged electronic component",
+        "weathered electronics",
+    ],
+}
+
+# Backward compatibility: Combined base templates
+BASE_TEMPLATES: Dict[str, List[str]] = {
+    cls: LEVEL1_GENERIC[cls] + LEVEL3_OBJECT_BASED[cls]
+    for cls in LEVEL1_GENERIC.keys()
 }
 
 # ============================================================================
@@ -166,7 +357,13 @@ ELECTRONICS_SPECIFIC_DESCRIPTORS: List[str] = [
 @dataclass
 class PromptSetConfig:
     """Configuration for prompt set size and coverage."""
-    size: Literal["small", "medium", "large"]
+    size: Literal["minimal", "small", "medium", "large"]
+    # Hierarchical levels
+    include_level1_generic: bool = True
+    include_level2_contextual: bool = True
+    include_level3_object_based: bool = True
+    include_level4_contamination: bool = True
+    # Environmental descriptors
     include_contamination: bool = True
     include_dirt: bool = True
     include_clutter: bool = True
@@ -229,10 +426,16 @@ def build_prompt_bank(
     extra_classes: Optional[Dict[str, List[str]]] = None,
 ) -> Dict[str, List[str]]:
     """
-    Build a research-grade prompt bank with configurable size and coverage.
+    Build a research-grade prompt bank with hierarchical structure and configurable size.
+
+    Implements 4-level prompt hierarchy:
+    - Level 1: Generic material descriptors
+    - Level 2: Contextual (photo/scene framing)
+    - Level 3: Object-based (specific items)
+    - Level 4: Contamination-aware (real-world conditions)
 
     Args:
-        base_templates: custom base templates (defaults to BASE_TEMPLATES)
+        base_templates: custom base templates (ignored if using hierarchical)
         config: PromptSetConfig for size/coverage (defaults to medium config)
         extra_classes: additional classes to include
 
@@ -240,50 +443,102 @@ def build_prompt_bank(
         Dictionary mapping class name -> list of prompts
 
     Example:
-        >>> cfg = PromptSetConfig(size="large")
+        >>> cfg = PromptSetConfig(size="large", include_level4_contamination=True)
         >>> prompts = build_prompt_bank(config=cfg)
-        >>> print(len(prompts["plastic"]))  # ~30-50 prompts per class
+        >>> print(len(prompts["plastic"]))  # 40-80 prompts per class
+        >>> 
+        >>> # Different configurations
+        >>> cfg_small = PromptSetConfig(size="small")
+        >>> cfg_medium = PromptSetConfig(size="medium")
+        >>> cfg_large = PromptSetConfig(
+        ...     size="large",
+        ...     include_level1_generic=True,
+        ...     include_level2_contextual=True,
+        ...     include_level3_object_based=True,
+        ...     include_level4_contamination=True
+        ... )
     """
-    if base_templates is None:
-        base_templates = BASE_TEMPLATES
-
     if config is None:
         config = PromptSetConfig(size="medium")
 
-    # Select descriptors based on config and class
-    descriptors_list: List[List[str]] = []
-    if config.include_contamination:
-        descriptors_list.append(CONTAMINATION_DESCRIPTORS)
-    if config.include_dirt:
-        descriptors_list.append(DIRT_DESCRIPTORS)
-    if config.include_clutter:
-        descriptors_list.append(CLUTTER_DESCRIPTORS)
-    if config.include_context:
-        descriptors_list.append(CONTEXT_DESCRIPTORS)
-    if config.include_lighting:
-        descriptors_list.append(LIGHTING_DESCRIPTORS)
-    if config.include_scale:
-        descriptors_list.append(SCALE_DESCRIPTORS)
-
-    # Limit based on prompt set size
-    max_per_class = {"small": 15, "medium": 35, "large": 60}.get(config.size, 35)
-
+    # Collect prompts from hierarchical levels
     prompt_bank: Dict[str, List[str]] = {}
-    templates = dict(base_templates)
+    
+    # Get class list
+    class_list = list(LEVEL1_GENERIC.keys())
     if extra_classes:
-        templates.update(extra_classes)
-
-    for class_name, base_list in templates.items():
-        # Add class-specific descriptors
-        class_descriptors = list(descriptors_list)
-        if class_name == "metal" and config.include_metal_specific:
-            class_descriptors.append(METAL_SPECIFIC_DESCRIPTORS)
-        elif class_name == "e-waste" and config.include_electronics_specific:
-            class_descriptors.append(ELECTRONICS_SPECIFIC_DESCRIPTORS)
+        class_list.extend(extra_classes.keys())
+    
+    for class_name in class_list:
+        class_prompts: List[str] = []
         
-        expanded = expand_class_prompts(base_list, class_descriptors, max_per_class)
-        prompt_bank[class_name] = expanded
-
+        # Level 1: Generic
+        if config.include_level1_generic and class_name in LEVEL1_GENERIC:
+            class_prompts.extend(LEVEL1_GENERIC[class_name])
+        
+        # Level 2: Contextual
+        if config.include_level2_contextual and class_name in LEVEL2_CONTEXTUAL:
+            class_prompts.extend(LEVEL2_CONTEXTUAL[class_name])
+        
+        # Level 3: Object-based
+        if config.include_level3_object_based and class_name in LEVEL3_OBJECT_BASED:
+            class_prompts.extend(LEVEL3_OBJECT_BASED[class_name])
+        
+        # Level 4: Contamination
+        if config.include_level4_contamination and class_name in LEVEL4_CONTAMINATION:
+            class_prompts.extend(LEVEL4_CONTAMINATION[class_name])
+        
+        # Add extra classes if provided
+        if extra_classes and class_name in extra_classes:
+            class_prompts.extend(extra_classes[class_name])
+        
+        # Build expanded prompts with environmental descriptors
+        base_for_expansion = class_prompts.copy()
+        
+        descriptors_list: List[List[str]] = []
+        if config.include_contamination:
+            descriptors_list.append(CONTAMINATION_DESCRIPTORS)
+        if config.include_dirt:
+            descriptors_list.append(DIRT_DESCRIPTORS)
+        if config.include_clutter:
+            descriptors_list.append(CLUTTER_DESCRIPTORS)
+        if config.include_context:
+            descriptors_list.append(CONTEXT_DESCRIPTORS)
+        if config.include_lighting:
+            descriptors_list.append(LIGHTING_DESCRIPTORS)
+        if config.include_scale:
+            descriptors_list.append(SCALE_DESCRIPTORS)
+        
+        # Add class-specific descriptors
+        if class_name == "metal" and config.include_metal_specific:
+            descriptors_list.append(METAL_SPECIFIC_DESCRIPTORS)
+        elif class_name == "e-waste" and config.include_electronics_specific:
+            descriptors_list.append(ELECTRONICS_SPECIFIC_DESCRIPTORS)
+        
+        # Expand with descriptors
+        if descriptors_list:
+            expanded = expand_class_prompts(
+                base_for_expansion[:10],  # Use subset for expansion to control size
+                descriptors_list,
+                max_prompts_per_class=None,
+            )
+            class_prompts.extend(expanded)
+        
+        # Limit based on prompt set size
+        max_per_class = {"minimal": 10, "small": 20, "medium": 50, "large": 100}.get(config.size, 50)
+        
+        # Deduplicate and limit
+        seen = set()
+        final_prompts: List[str] = []
+        for p in class_prompts:
+            if p not in seen:
+                final_prompts.append(p)
+                seen.add(p)
+                if len(final_prompts) >= max_per_class:
+                    break
+        
+        prompt_bank[class_name] = final_prompts
+    
     return prompt_bank
 
 

@@ -20,6 +20,8 @@ import torch.nn.functional as F
 from transformers import CLIPModel, CLIPProcessor
 import time
 
+from utils.embedding_cache import get_global_cache
+
 # ============================================================================
 # Configuration Classes
 # ============================================================================
@@ -27,13 +29,14 @@ import time
 class ClipConfig:
     """Configuration for CLIP model and inference."""
     model_name: str = "openai/clip-vit-base-patch32"
-    device: Optional[str] = None
-    use_fp16: bool = True
+    device: Optional[str] = None  # Will auto-detect GPU
+    use_fp16: bool = True  # Enable FP16 on GPU for speed
     text_batch: int = 64
     image_batch: int = 32
     temperature: float = 0.1
     aggregation_method: str = "mean"  # "mean" or "trimmed_mean"
     trimmed_mean_fraction: float = 0.1
+    use_embedding_cache: bool = True  # Enable persistent caching
 
 
 @dataclass
@@ -103,8 +106,26 @@ class ClipWasteClassifier:
             owners.extend([cls] * len(plist))
 
         self._owners = owners
+        
+        # Try to load from cache
+        if self.config.use_embedding_cache:
+            cache = get_global_cache()
+            cached_result = cache.load(
+                model_name=self.config.model_name,
+                prompts=prompts,
+                normalized=True
+            )
+            
+            if cached_result is not None:
+                embeddings, cached_owners = cached_result
+                self._text_feats = embeddings.to(self.device)
+                if self.config.use_fp16 and self.device.type == "cuda":
+                    self._text_feats = self._text_feats.half()
+                print(f"✓ Loaded {len(prompts)} cached text embeddings")
+                return
 
-        # Batch encode prompts
+        # Cache miss - compute embeddings
+        print(f"Computing text embeddings for {len(prompts)} prompts...")
         feats = []
         for i in range(0, len(prompts), self.config.text_batch):
             batch = prompts[i : i + self.config.text_batch]
@@ -117,6 +138,18 @@ class ClipWasteClassifier:
             feats.append(tf)
 
         self._text_feats = torch.cat(feats, dim=0)
+        
+        # Save to cache
+        if self.config.use_embedding_cache:
+            cache = get_global_cache()
+            cache.save(
+                model_name=self.config.model_name,
+                prompts=prompts,
+                embeddings=self._text_feats,
+                prompt_owners=owners,
+                normalized=True
+            )
+            print(f"✓ Saved embeddings to cache")
 
     def _encode_image(self, image: Image.Image) -> torch.Tensor:
         """Encode a single image to normalized embedding."""
